@@ -145,6 +145,10 @@ set (WSTREAMRIPPER_SRC
 	winamp_plugin/Script.rc
 	)
 
+set (DSTREAMRIPPER_SRC
+    console/daemon.c
+    )
+
 ##-----------------------------------------------------------------------------
 ##  Targets
 ##-----------------------------------------------------------------------------
@@ -216,6 +220,14 @@ target_link_libraries (streamripper
 if (NOT STREAMRIPPER_LDFLAGS STREQUAL "")
     set_target_properties (streamripper 
 	PROPERTIES LINK_FLAGS ${STREAMRIPPER_LDFLAGS})
+endif ()
+
+add_executable (streamripperd ${DSTREAMRIPPER_SRC})
+target_link_libraries (streamripperd 
+    streamripper1 ${STREAMRIPPER_LIBS})
+if (NOT STREAMRIPPER_LDFLAGS STREQUAL "")
+    set_target_properties (streamripperd
+        PROPERTIES LINK_FLAGS ${STREAMRIPPER_LDFLAGS})
 endif ()
 
 if (WIN32)
