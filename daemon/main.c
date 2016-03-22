@@ -36,6 +36,81 @@ static BOOL m_got_the_signal = FALSE;
 static BOOL m_dont_print = FALSE;
 static BOOL m_print_stderr = FALSE;
 time_t      m_stop_time = 0;
+STREAM_PREFS prefs;
+
+enum PrefsValue {
+    URL,
+    OUTPUT_DIR,
+    INCOMPLETE_DIR
+};
+
+static void set_pref(enum PrefsValue val, char * data)
+{
+    char * cfg_string = NULL;
+    if (m_config != NULL) {
+        prefs_load();
+        m_config = cfg_open(cfg_file_name);
+        switch (val) {
+            case URL:
+                if (data == NULL) {
+                    cfg_string = cfg_get_single_value_as_string(m_config, "Streamripper", "url");
+                    if (cfg_string == NULL) {
+                        cfg_set_single_value_as_string(m_config, "Streamripper", "url", DEFAULT_URL);
+                        strncpy(prefs.url, DEFAULT_URL, MAX_URL_LEN);
+                    } else {
+                        strncpy(prefs.url, cfg_string, MAX_URL_LEN);
+                    }
+                } else {
+                    cfg_set_single_value_as_string(m_config, "Streamripper", "url", data);
+                    prefs_get_stream_prefs (&prefs, (char *)data);
+                    strncpy(prefs.url, data, MAX_URL_LEN);
+                }
+                print_to_console("%s: set url to %s\n", __func__, prefs.url);
+                break;
+            case OUTPUT_DIR:
+                if (data == NULL) {
+                    cfg_string = cfg_get_single_value_as_string(m_config, "Streamripper", "dest_dir");
+                    if (cfg_string == NULL) {
+                        cfg_set_single_value_as_string(m_config, "Streamripper", "dest_dir", DEFAULT_OUTPUT_DIR);
+                        strncpy(prefs.output_directory, DEFAULT_OUTPUT_DIR, SR_MAX_PATH);
+                    } else {
+                        strncpy(prefs.output_directory, cfg_string, SR_MAX_PATH);
+                    }
+                } else {
+                    cfg_set_single_value_as_string(m_config, "Streamripper", "dest_dir", data);
+                    strncpy(prefs.output_directory, data, MAX_URL_LEN);
+                }
+                print_to_console("%s: set output_directory to %s\n", __func__, prefs.output_directory);
+                break;
+            case INCOMPLETE_DIR:
+                if (data == NULL) {
+                    cfg_string = cfg_get_single_value_as_string(m_config, "Streamripper", "incomplete_dir");
+                    if (cfg_string == NULL) {
+                        cfg_set_single_value_as_string(m_config, "Streamripper", "incomplete_dir", DEFAULT_INCOMPLETE_DIR);
+                        strncpy(prefs.incomplete_directory, DEFAULT_INCOMPLETE_DIR, SR_MAX_PATH);
+                    } else {
+                        strncpy(prefs.incomplete_directory, cfg_string, SR_MAX_PATH);
+                    }
+                } else {
+                    cfg_set_single_value_as_string(m_config, "Streamripper", "incomplete_dir", data);
+                    strncpy(prefs.incomplete_directory, data, MAX_URL_LEN);
+                }
+                print_to_console("%s: set incomplete_directory to %s\n", __func__, prefs.incomplete_directory);
+                break;
+            default:
+                print_to_console("%s: what am I doing here?", __func__);
+        }
+        prefs_save();
+        
+        free(cfg_string);
+        cfg_close(m_config);
+
+
+        verify_splitpoint_rules(&prefs);
+    } else
+        print_to_console("%s: m_config must be NULL and cfg_file_name must be not NULL\n", __func__);
+    return;
+}
 
 int main()
 {
@@ -43,7 +118,6 @@ int main()
     char *cfg_string = NULL;
     struct passwd *pw = getpwuid(getuid());
 
-    STREAM_PREFS prefs;
     RIP_MANAGER_INFO *rmi = 0;
 
     sr_set_locale ();
@@ -61,8 +135,8 @@ int main()
     {
         cfg_set_single_value_as_string(m_config, "Default", "version", VERSION);
     }
-//    free(cfg_string);
-    cfg_string = cfg_get_single_value_as_string(m_config, "Streamripper", "url");
+    free(cfg_string);
+/*    cfg_string = cfg_get_single_value_as_string(m_config, "Streamripper", "url");
     if (cfg_string == NULL) {
         cfg_set_single_value_as_string(m_config, "Streamripper", "url", DEFAULT_URL);
         strncpy(prefs.url, DEFAULT_URL, MAX_URL_LEN);
@@ -92,11 +166,14 @@ int main()
     
     prefs_save ();
 
-    free(cfg_string);
+    free(cfg_string);*/
     cfg_close(m_config);
 
+    set_pref(URL, NULL);
+    set_pref(OUTPUT_DIR, NULL);
+    set_pref(INCOMPLETE_DIR, NULL);
 
-    verify_splitpoint_rules(&prefs);
+//    verify_splitpoint_rules(&prefs);
 
     while (!m_got_the_signal) {
         if (!m_started) {
