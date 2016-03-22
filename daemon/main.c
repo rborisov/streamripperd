@@ -12,6 +12,7 @@
 #include "mchar.h"
 #include "filelib.h"
 #include "debug.h"
+#include "socket.h"
 
 #ifndef VERSION
 #define VERSION "dev"
@@ -37,6 +38,8 @@ static BOOL m_dont_print = FALSE;
 static BOOL m_print_stderr = FALSE;
 time_t      m_stop_time = 0;
 STREAM_PREFS prefs;
+pthread_mutex_t signal_mutex;
+static pthread_t evt_mon_thread;
 
 enum PrefsValue {
     URL,
@@ -120,7 +123,7 @@ int main()
 
     RIP_MANAGER_INFO *rmi = 0;
 
-    sr_set_locale ();
+    sr_set_locale();
 
     signal (SIGINT, catch_sig);
     signal (SIGTERM, catch_sig);
@@ -136,44 +139,18 @@ int main()
         cfg_set_single_value_as_string(m_config, "Default", "version", VERSION);
     }
     free(cfg_string);
-/*    cfg_string = cfg_get_single_value_as_string(m_config, "Streamripper", "url");
-    if (cfg_string == NULL) {
-        cfg_set_single_value_as_string(m_config, "Streamripper", "url", DEFAULT_URL);
-        strncpy(prefs.url, DEFAULT_URL, MAX_URL_LEN);
-    } else {
-        strncpy(prefs.url, cfg_string, MAX_URL_LEN);
-    }
-    print_to_console("... to %s\n", prefs.url);
-
-    prefs_load ();
-    prefs_get_stream_prefs(&prefs, prefs.url);
-
-    cfg_string = cfg_get_single_value_as_string(m_config, "Streamripper", "dest_dir");
-    if (cfg_string == NULL) {
-        cfg_set_single_value_as_string(m_config, "Streamripper", "dest_dir", DEFAULT_OUTPUT_DIR);
-        strncpy(prefs.output_directory, DEFAULT_OUTPUT_DIR, SR_MAX_PATH);
-    } else {
-        strncpy(prefs.output_directory, cfg_string, SR_MAX_PATH);
-    }
-
-    cfg_string = cfg_get_single_value_as_string(m_config, "Streamripper", "incomplete_dir");
-    if (cfg_string == NULL) {
-        cfg_set_single_value_as_string(m_config, "Streamripper", "incomplete_dir", DEFAULT_INCOMPLETE_DIR);
-        strncpy(prefs.incomplete_directory, DEFAULT_INCOMPLETE_DIR, SR_MAX_PATH);
-    } else {
-        strncpy(prefs.incomplete_directory, cfg_string, SR_MAX_PATH);
-    }
-    
-    prefs_save ();
-
-    free(cfg_string);*/
     cfg_close(m_config);
 
     set_pref(URL, NULL);
     set_pref(OUTPUT_DIR, NULL);
     set_pref(INCOMPLETE_DIR, NULL);
 
-//    verify_splitpoint_rules(&prefs);
+    pthread_mutex_init(&signal_mutex, NULL);
+    if (pthread_create(&evt_mon_thread, NULL, (void *)evt_thread, NULL) != 0) {
+        perror("pthread_create for evt_monitor\n");
+        pthread_mutex_destroy(&signal_mutex);
+        return -1;
+    }
 
     while (!m_got_the_signal) {
         if (!m_started) {
@@ -188,6 +165,9 @@ int main()
 
     rip_manager_stop (rmi);
     rip_manager_cleanup ();
+
+    cleanup_thread(evt_mon_thread);
+    pthread_mutex_destroy(&signal_mutex);
 
     return ret;
 }

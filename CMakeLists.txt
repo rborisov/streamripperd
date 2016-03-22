@@ -22,7 +22,7 @@ include (FindPkgConfig)
 # http://www.cmake.org/pipermail/cmake/2008-December/025886.html
 include (InstallRequiredSystemLibraries)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -Wall -D__UNIX__ -fno-builtin")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -Wall -D__UNIX__ -fno-builtin -D_GNU_SOURCE")
 
 ##-----------------------------------------------------------------------------
 ##  Find libraries
@@ -48,6 +48,7 @@ find_library (SEMAPHORE_LIBRARIES NAMES sem rt)
 include_directories (BEFORE ${GLIB2_INCLUDE_DIRS})
 include_directories (BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 include_directories (BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/lib)
+include_directories (BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
 ##-----------------------------------------------------------------------------
 ##  Configure include file
@@ -70,6 +71,9 @@ set (STREAMRIPPER_SRC
 set (SRD_SRC
     daemon/main.c
     daemon/config1.c
+    daemon/socket_local_server.c
+    daemon/socket_local_client.c
+    daemon/socket.c
     )
 ##-----------------------------------------------------------------------------
 ##  Targets
