@@ -62,9 +62,9 @@ static void set_pref(enum PrefsValue val, char * data)
                     }
                 } else {
                     cfg_set_single_value_as_string(m_config, "Streamripper", "url", data);
-                    prefs_get_stream_prefs (&prefs, (char *)data);
                     strncpy(prefs.url, data, MAX_URL_LEN);
                 }
+                prefs_get_stream_prefs (&prefs, prefs.url);
                 print_to_console("%s: set url to %s\n", __func__, prefs.url);
                 break;
             case OUTPUT_DIR:
