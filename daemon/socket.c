@@ -126,12 +126,15 @@ int handle_command_writes(int fd) {
         return -99;
     }
 
-/*    ALOGV("%s: Protocol_byte: %x\n", __func__, first_byte);
-    switch(first_byte) {
+//    ALOGV("%s: Protocol_byte: %x\n", __func__, first_byte);
+    switch(client_msg.msg_type) {
+        case SET_URL:
+            ALOGE("%s: SET_URL msg received\n", __func__);
+            break;
         default:
             ALOGE("%s: Unexpected data format!!\n",__func__);
             retval = -1;
-    }*/
+    }
 
     ALOGV("%s: retval %d\n", __func__, 0);
     return 0;

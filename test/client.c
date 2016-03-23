@@ -63,6 +63,7 @@ int main()
     if (fd1 != -1) {
         ALOGV("%s: received the socket fd: %d\n",
                 __func__, fd1);
+        client_msg.msg_type = SET_URL;
         send_smth_to(fd1);
     }
 

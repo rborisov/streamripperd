@@ -4,8 +4,12 @@
 #define CLIENT_NAME_MAX (20)
 #define BUF_MAX (128)
 
+enum MsgType {
+    SET_URL,
+};
+
 struct sr_msg_data {
-    int msg_type;
+    enum MsgType msg_type;
     char client_name[CLIENT_NAME_MAX];
     union {
         int req_data;
