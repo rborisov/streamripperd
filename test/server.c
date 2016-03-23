@@ -12,9 +12,6 @@
 #include <fcntl.h>
 #include <sys/un.h>
 #include <cutils/sockets.h>
-#include <interfaces.h>
-
-#include "socket.h"
 
 #define ALOGD(fmt, args...) fprintf(stderr, fmt, ##args)
 #define ALOGE(fmt, args...) fprintf(stderr, fmt, ##args)
@@ -23,7 +20,6 @@
 #define EVT_SOCK "evt_sock"
 
 #define EVT_CMD_PACKET 1
-#define UDM_CMD_PACKET 2
 
 #ifndef SRD_UID
 #define SRD_UID 1002
@@ -36,7 +32,11 @@
 #define ROOT_UID 0
 #endif
 
+pthread_mutex_t signal_mutex;
+
 int remote_evt_fd;
+static pthread_t evt_mon_thread;
+
 static void handle_cleanup();
 
 static int establish_remote_socket(char *name)
@@ -108,36 +108,32 @@ static int establish_remote_socket(char *name)
 
 int handle_command_writes(int fd) {
     ALOGV("%s: \n", __func__);
-//    unsigned char first_byte;
+    unsigned char first_byte;
     int retval;
-    struct sr_msg_data client_msg;
 
-//    retval = read (fd, &first_byte, 1);
-    memset(&client_msg, 0, sizeof(struct sr_msg_data));
-    retval = recv(fd, &client_msg, sizeof(struct sr_msg_data), 0);    
+    retval = read (fd, &first_byte, 1);
     if (retval < 0) {
         ALOGE("%s:read returns err: %d\n", __func__,retval);
         return -1;
     }
-    ALOGD("%s: received %d bytes from fd %d\n", __func__, sizeof(struct sr_msg_data), fd);
 
     if (retval == 0) {
         ALOGE("%s: This indicates the close of other end\n", __func__);
         return -99;
     }
 
-/*    ALOGV("%s: Protocol_byte: %x\n", __func__, first_byte);
+    ALOGV("%s: Protocol_byte: %x\n", __func__, first_byte);
     switch(first_byte) {
         default:
             ALOGE("%s: Unexpected data format!!\n",__func__);
             retval = -1;
-    }*/
+    }
 
     ALOGV("%s: retval %d\n", __func__, 0);
     return 0;
 }
 
-int evt_thread() {
+static int evt_thread() {
     fd_set client_fds;
     int retval, n;
 
@@ -201,6 +197,51 @@ int cleanup_thread(pthread_t thread) {
     return status;
 }
 
+static int main_thread()
+{
+    int ret = 0;
+    ALOGV("%s: Entry\n", __func__);
+    while (1) {
+        sleep(1);
+    }
+    ALOGV("%s: End\n", __func__);
+    return ret;
+}
+
+int main() {
+    int ret = 0;
+    ALOGV("%s: Entry\n", __func__);
+    signal(SIGPIPE, SIG_IGN);
+
+    pthread_mutex_init(&signal_mutex, NULL);
+    if (pthread_create(&evt_mon_thread, NULL, (void *)evt_thread, NULL) != 0) {
+        perror("pthread_create for evt_monitor\n");
+        pthread_mutex_destroy(&signal_mutex);
+        return -1;
+    }
+
+    ret = main_thread();
+    if (ret < 0) {
+        ALOGE("%s: start_main_thread returns: %d", __func__, ret);
+    }
+
+    cleanup_thread(evt_mon_thread);
+    pthread_mutex_destroy(&signal_mutex);
+
+    ALOGV("%s: Exit: %d\n", __func__, ret);
+    return ret;
+}
+
 static void handle_cleanup()
 {
+}
+
+void report_soc_failure(void)
+{
+   char eve_buf[] = {0x04,0x10,0x01,0x0f};
+   int ret_val;
+   ALOGD("%s\n",__func__);
+   ret_val = write(remote_evt_fd,eve_buf,4);
+   if(ret_val < 0)
+    ALOGE("%s: Failed to report\n",__func__);
 }

@@ -49,6 +49,7 @@ include_directories (BEFORE ${GLIB2_INCLUDE_DIRS})
 include_directories (BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 include_directories (BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 include_directories (BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories (BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 ##-----------------------------------------------------------------------------
 ##  Configure include file
@@ -68,11 +69,16 @@ set (STREAMRIPPER_SRC
     test/streamripper.c
     )
 
+set (TESTCLIENT_SRC
+    test/client.c
+    src/socket_local_client.c
+    )
+
 set (SRD_SRC
     daemon/main.c
-    daemon/config1.c
-    daemon/socket_local_server.c
-    daemon/socket_local_client.c
+    src/config1.c
+    src/socket_local_server.c
+    src/socket_local_client.c
     daemon/socket.c
     )
 ##-----------------------------------------------------------------------------
@@ -118,6 +124,14 @@ target_link_libraries (streamripperd
     streamripper1 ${STREAMRIPPER_LIBS})
 if (NOT STREAMRIPPER_LDFLAGS STREQUAL "")
     set_target_properties (streamripperd
+        PROPERTIES LINK_FLAGS ${STREAMRIPPER_LDFLAGS})
+endif ()
+
+add_executable (testclient ${TESTCLIENT_SRC})
+target_link_libraries (testclient 
+    streamripper1 ${STREAMRIPPER_LIBS})
+if (NOT STREAMRIPPER_LDFLAGS STREQUAL "")
+    set_target_properties (testclient 
         PROPERTIES LINK_FLAGS ${STREAMRIPPER_LDFLAGS})
 endif ()
 

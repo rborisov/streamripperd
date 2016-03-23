@@ -182,11 +182,11 @@ void rip_callback (RIP_MANAGER_INFO* rmi, int message, void *data)
             break;
         case RM_ERROR:
             err = (ERROR_INFO*)data;
-            print_to_console("error %d [%s]\n", err->error_code, err->error_str);
+            print_to_console("\nerror %d [%s]\n", err->error_code, err->error_str);
             m_alldone = TRUE;
             break;
         case RM_DONE:
-            print_to_console("bye..\n");
+            print_to_console("\nbye..\n");
             m_alldone = TRUE;
             break;
         case RM_NEW_TRACK:
