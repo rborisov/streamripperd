@@ -15,6 +15,8 @@
 #define DEFAULT_INCOMPLETE_DIR "Incomplete"
 #define DEFAULT_URL "http://svr1.msmn.co:8136"
 
+static BOOL m_prefs_updated = FALSE;
+
 config_obj *m_config;
 static char cfg_file_name[128] = "";
 static void verify_splitpoint_rules (STREAM_PREFS *prefs);
@@ -31,6 +33,13 @@ void init_config() {
     }
     free(cfg_string);
     cfg_close(m_config);
+}
+
+BOOL do_restart()
+{
+    BOOL rc = m_prefs_updated;
+    m_prefs_updated = FALSE;
+    return rc;
 }
 
 void set_pref(enum PrefsValue val, char * data)
@@ -54,6 +63,7 @@ void set_pref(enum PrefsValue val, char * data)
                     strncpy(prefs.url, data, MAX_URL_LEN);
                 }
                 prefs_get_stream_prefs (&prefs, prefs.url);
+                m_prefs_updated = TRUE;
                 print_to_console("%s: set url to %s\n", __func__, prefs.url);
                 break;
             case OUTPUT_DIR:
@@ -69,6 +79,7 @@ void set_pref(enum PrefsValue val, char * data)
                     cfg_set_single_value_as_string(m_config, "Streamripper", "dest_dir", data);
                     strncpy(prefs.output_directory, data, SR_MAX_PATH);
                 }
+                m_prefs_updated = TRUE;
                 print_to_console("%s: set output_directory to %s\n", __func__, prefs.output_directory);
                 break;
             case INCOMPLETE_DIR:
@@ -84,6 +95,7 @@ void set_pref(enum PrefsValue val, char * data)
                     cfg_set_single_value_as_string(m_config, "Streamripper", "incomplete_dir", data);
                     strncpy(prefs.incomplete_directory, data, SR_MAX_PATH);
                 }
+                m_prefs_updated = TRUE;
                 print_to_console("%s: set incomplete_directory to %s\n", __func__, prefs.incomplete_directory);
                 break;
             default:

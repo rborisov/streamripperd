@@ -121,15 +121,12 @@ int handle_command_writes(int fd) {
             case MSG_SET_URL:
                 ALOGV("%s: SET_URL msg received: %s\n", __func__, client_msg.data);
                 set_pref(URL, client_msg.data);
-                m_prefs_do_restart = TRUE;
                 break;
             case MSG_SET_OUTPUT_PATH:
                 ALOGV("%s: SET_OUTPUT_PATH msg received: %s\n", __func__, client_msg.data);
-                m_prefs_do_restart = TRUE;
                 break;
             case MSG_SET_INCOMPLETE_PATH:
                 ALOGV("%s: SET_INCOMPLETE_PATH msg received: %s\n", __func__, client_msg.data);
-                m_prefs_do_restart = TRUE;
                 break;
             default:
                 ALOGE("%s: Unexpected data format!!\n",__func__);

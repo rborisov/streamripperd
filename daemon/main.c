@@ -36,8 +36,6 @@ int main()
     signal (SIGINT, catch_sig);
     signal (SIGTERM, catch_sig);
 
-    m_prefs_do_restart = FALSE;
-
     print_to_console("Connecting...\n");
     rip_manager_init ();
 
@@ -55,9 +53,8 @@ int main()
     }
 
     while (!m_got_the_signal) {
-        if (m_prefs_do_restart) {
+        if (do_restart() && m_started) {
             rip_manager_stop(rmi);
-            m_prefs_do_restart = FALSE;
             m_started = FALSE;
         }
         if (!m_started) {
