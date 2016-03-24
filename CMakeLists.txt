@@ -80,6 +80,8 @@ set (SRD_SRC
     src/socket_local_server.c
     src/socket_local_client.c
     daemon/socket.c
+    daemon/prefs.c
+    daemon/logging.c
     )
 ##-----------------------------------------------------------------------------
 ##  Targets

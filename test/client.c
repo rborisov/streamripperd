@@ -63,7 +63,12 @@ int main()
     if (fd1 != -1) {
         ALOGV("%s: received the socket fd: %d\n",
                 __func__, fd1);
-        client_msg.msg_type = SET_URL;
+        client_msg.msg_type = MSG_SET_URL;
+        strcpy(client_msg.data, "http://svr1.msmn.co:8136");
+        send_smth_to(fd1);
+        sleep(10);
+        client_msg.msg_type = MSG_SET_OUTPUT_PATH;
+        strcpy(client_msg.data, "/storage/Music");
         send_smth_to(fd1);
     }
 

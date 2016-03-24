@@ -15,10 +15,8 @@
 #include <interfaces.h>
 
 #include "socket.h"
-
-#define ALOGD(fmt, args...) fprintf(stderr, fmt, ##args)
-#define ALOGE(fmt, args...) fprintf(stderr, fmt, ##args)
-#define ALOGV(fmt, args...) fprintf(stderr, fmt, ##args)
+#include "logging.h"
+#include "prefs1.h"
 
 #define EVT_SOCK "evt_sock"
 
@@ -37,7 +35,6 @@
 #endif
 
 int remote_evt_fd;
-static void handle_cleanup();
 
 static int establish_remote_socket(char *name)
 {
@@ -107,36 +104,39 @@ static int establish_remote_socket(char *name)
 }
 
 int handle_command_writes(int fd) {
-    ALOGV("%s: \n", __func__);
-//    unsigned char first_byte;
     int retval;
     struct sr_msg_data client_msg;
 
-//    retval = read (fd, &first_byte, 1);
     memset(&client_msg, 0, sizeof(struct sr_msg_data));
     retval = recv(fd, &client_msg, sizeof(struct sr_msg_data), 0);    
     if (retval < 0) {
         ALOGE("%s:read returns err: %d\n", __func__,retval);
         return -1;
     }
-    ALOGD("%s: received %d bytes from fd %d\n", __func__, sizeof(struct sr_msg_data), fd);
+    if (retval == 0)
+        return -99; //no more data received
 
-    if (retval == 0) {
-        ALOGE("%s: This indicates the close of other end\n", __func__);
-        return -99;
+    if (retval > 0) {
+        switch(client_msg.msg_type) {
+            case MSG_SET_URL:
+                ALOGV("%s: SET_URL msg received: %s\n", __func__, client_msg.data);
+                set_pref(URL, client_msg.data);
+                m_prefs_do_restart = TRUE;
+                break;
+            case MSG_SET_OUTPUT_PATH:
+                ALOGV("%s: SET_OUTPUT_PATH msg received: %s\n", __func__, client_msg.data);
+                m_prefs_do_restart = TRUE;
+                break;
+            case MSG_SET_INCOMPLETE_PATH:
+                ALOGV("%s: SET_INCOMPLETE_PATH msg received: %s\n", __func__, client_msg.data);
+                m_prefs_do_restart = TRUE;
+                break;
+            default:
+                ALOGE("%s: Unexpected data format!!\n",__func__);
+                retval = -1;
+        }
     }
 
-//    ALOGV("%s: Protocol_byte: %x\n", __func__, first_byte);
-    switch(client_msg.msg_type) {
-        case SET_URL:
-            ALOGE("%s: SET_URL msg received\n", __func__);
-            break;
-        default:
-            ALOGE("%s: Unexpected data format!!\n",__func__);
-            retval = -1;
-    }
-
-    ALOGV("%s: retval %d\n", __func__, 0);
     return 0;
 }
 
@@ -168,11 +168,7 @@ int evt_thread() {
                 retval = handle_command_writes(remote_evt_fd);
                 ALOGV("%s: handle_command_writes . %d\n", __func__, retval);
                if(retval < 0) {
-                   if (retval == -99) {
-                       ALOGV("%s:End of wait loop\n", __func__);
-                   }
-                   ALOGV("%s: handle_command_writes returns: %d: \n", __func__, retval);
-                   handle_cleanup();
+                   ALOGV("%s:End of wait loop\n", __func__);
                    break;
                 }
             }
@@ -202,8 +198,4 @@ int cleanup_thread(pthread_t thread) {
     }
     ALOGV("%s: End\n", __func__);
     return status;
-}
-
-static void handle_cleanup()
-{
 }
