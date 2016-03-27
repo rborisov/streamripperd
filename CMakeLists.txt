@@ -83,6 +83,7 @@ set (SRD_SRC
     daemon/prefs.c
     daemon/logging.c
     )
+
 ##-----------------------------------------------------------------------------
 ##  Targets
 ##-----------------------------------------------------------------------------
@@ -107,17 +108,18 @@ if (CMAKE_THREAD_LIBS_INIT)
 endif ()
 
 set (STREAMRIPPER_LIBS ${STREAMRIPPER_LIBS} ${SR_EXTRA_LIBS} ${MATH_LIB})
+set (PLAYER_LIBS ${MATH_LIB})
 
 ##-----------------------------------------------------------------------------
 ##  Linking
 ##-----------------------------------------------------------------------------
 set (STREAMRIPPER_LDFLAGS "")
 
-add_executable (streamripper ${STREAMRIPPER_SRC})
-target_link_libraries (streamripper 
+add_executable (test_streamripper ${STREAMRIPPER_SRC})
+target_link_libraries (test_streamripper 
     streamripper1 ${STREAMRIPPER_LIBS})
 if (NOT STREAMRIPPER_LDFLAGS STREQUAL "")
-    set_target_properties (streamripper 
+    set_target_properties (test_streamripper 
 	PROPERTIES LINK_FLAGS ${STREAMRIPPER_LDFLAGS})
 endif ()
 
