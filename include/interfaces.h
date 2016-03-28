@@ -10,6 +10,8 @@ enum MsgType {
     MSG_SET_URL,
     MSG_SET_OUTPUT_PATH,
     MSG_SET_INCOMPLETE_PATH,
+    MSG_START_STREAMRIPPER,
+    MSG_STOP_STREAMRIPPER
 };
 
 struct sr_msg_data {

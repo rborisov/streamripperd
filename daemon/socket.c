@@ -118,15 +118,25 @@ int handle_command_writes(int fd) {
 
     if (retval > 0) {
         switch(client_msg.msg_type) {
+            case MSG_STOP_STREAMRIPPER:
+                ALOGV("%s: STOP msg received\n", __func__);
+                set_pref_started(FALSE);
+                break;
+            case MSG_START_STREAMRIPPER:
+                ALOGV("%s: START msg received\n", __func__);
+                set_pref_started(TRUE);
+                break;
             case MSG_SET_URL:
                 ALOGV("%s: SET_URL msg received: %s\n", __func__, client_msg.data);
                 set_pref(URL, client_msg.data);
                 break;
             case MSG_SET_OUTPUT_PATH:
                 ALOGV("%s: SET_OUTPUT_PATH msg received: %s\n", __func__, client_msg.data);
+                //TODO
                 break;
             case MSG_SET_INCOMPLETE_PATH:
                 ALOGV("%s: SET_INCOMPLETE_PATH msg received: %s\n", __func__, client_msg.data);
+                //TODO
                 break;
             default:
                 ALOGE("%s: Unexpected data format!!\n",__func__);

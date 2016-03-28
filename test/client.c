@@ -53,23 +53,74 @@ int connect_to_local_socket(char* name)
     return sk;
 }
 
-int main() 
+static void parse_arguments(int fd, int argc, char **argv)
+{
+    int i;
+    char *c;
+    for (i = 1; i < argc; i++) {
+        if (argv[i][0] != '-')
+            continue;
+
+        c = strchr ("iou", argv[i][1]);
+        if (c != NULL) {
+            if ((i == (argc-1)) || (argv[i+1][0] == '-')) {
+                fprintf(stderr, "option %s requires an argument\n", argv[i]);
+                exit(1);
+            }
+        }
+        switch (argv[i][1])
+        {
+            case 's':
+                //stop
+                client_msg.msg_type = MSG_STOP_STREAMRIPPER;
+                break;
+            case 'S':
+                //start
+                client_msg.msg_type = MSG_START_STREAMRIPPER;
+                break;
+            case 'u':
+                //set url
+                client_msg.msg_type = MSG_SET_URL;
+                strcpy(client_msg.data, argv[i]);
+                break;
+            case 'o':
+                //set out dir
+                client_msg.msg_type = MSG_SET_OUTPUT_PATH;
+                strcpy(client_msg.data, argv[i]);
+                break;
+            case 'i':
+                //set incomplete dir
+                client_msg.msg_type = MSG_SET_INCOMPLETE_PATH;
+                strcpy(client_msg.data, argv[i]);
+                break;
+        }
+        send_smth_to(fd);
+    }
+
+}
+
+int main(int argc, char *argv[]) 
 {
     int ret = 0;
-    int fd, fd1;
+    int fd1;
     ALOGV("%s: Entry\n", __func__);
 
-    fd1 = connect_to_local_socket("evt_sock");
+//    fd1 = connect_to_local_socket("evt_sock");
+    do {
+        fd1 = connect_to_local_socket("evt_sock");
+        sleep(1);
+    } while (fd1 == -1);
     if (fd1 != -1) {
         ALOGV("%s: received the socket fd: %d\n",
                 __func__, fd1);
-        client_msg.msg_type = MSG_SET_URL;
-        strcpy(client_msg.data, "http://svr1.msmn.co:8136");
-        send_smth_to(fd1);
-        sleep(10);
-        client_msg.msg_type = MSG_SET_OUTPUT_PATH;
-        strcpy(client_msg.data, "/storage/Music");
-        send_smth_to(fd1);
+        parse_arguments(fd1, argc, argv);
+//        client_msg.msg_type = MSG_SET_URL;
+//        strcpy(client_msg.data, "http://svr1.msmn.co:8136");
+//        send_smth_to(fd1);
+//        sleep(10);
+//        client_msg.msg_type = MSG_SET_OUTPUT_PATH;
+//        strcpy(client_msg.data, "/storage/Music");
+//        send_smth_to(fd1);
     }
 
     close(fd1);

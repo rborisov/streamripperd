@@ -53,11 +53,11 @@ int main()
     }
 
     while (!m_got_the_signal) {
-        if (do_restart() && m_started) {
+        if ((!get_pref_started() || do_restart()) && m_started) {
             rip_manager_stop(rmi);
             m_started = FALSE;
         }
-        if (!m_started) {
+        if (!m_started && get_pref_started()) {
             if ((ret = rip_manager_start (&rmi, &prefs, rip_callback)) != SR_SUCCESS) {
                 print_to_console("error: rip_manager_start %d\n", ret);
             }

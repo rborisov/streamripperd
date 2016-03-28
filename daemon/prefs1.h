@@ -14,5 +14,7 @@ enum PrefsValue {
 void init_config();
 void set_pref(enum PrefsValue val, char * data);
 BOOL do_restart();
+BOOL get_pref_started();
+void set_pref_started(BOOL data);
 
 #endif

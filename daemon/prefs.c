@@ -16,6 +16,7 @@
 #define DEFAULT_URL "http://svr1.msmn.co:8136"
 
 static BOOL m_prefs_updated = FALSE;
+static int m_prefs_started = -1;
 
 config_obj *m_config;
 static char cfg_file_name[128] = "";
@@ -31,6 +32,7 @@ void init_config() {
     {
         cfg_set_single_value_as_string(m_config, "Default", "version", VERSION);
     }
+    m_prefs_started = cfg_get_single_value_as_int_with_default(m_config, "Streamripper", "started", 1);
     free(cfg_string);
     cfg_close(m_config);
 }
@@ -40,6 +42,27 @@ BOOL do_restart()
     BOOL rc = m_prefs_updated;
     m_prefs_updated = FALSE;
     return rc;
+}
+
+BOOL get_pref_started()
+{
+    if (m_prefs_started == -1 && m_config != NULL) {
+        m_config = cfg_open(cfg_file_name);
+        //streamripper is started by default
+        m_prefs_started = cfg_get_single_value_as_int_with_default(m_config, "Streamripper", "started", 1);
+        cfg_close(m_config);
+    }
+    return TRUE ? (m_prefs_started == 1) : FALSE;
+}
+
+void set_pref_started(BOOL data)
+{
+    m_prefs_started = 1 ? data : 0;
+    if (m_config != NULL) {
+        m_config = cfg_open(cfg_file_name);
+        cfg_set_single_value_as_int(m_config, "Streamripper",  "started", m_prefs_started);
+        cfg_close(m_config);
+    }
 }
 
 void set_pref(enum PrefsValue val, char * data)
