@@ -11,8 +11,8 @@
 #endif
 
 #define DEFAULT_CFG_FILENAME "streamripperd.cfg"
-#define DEFAULT_OUTPUT_DIR "Music"
-#define DEFAULT_INCOMPLETE_DIR "Incomplete"
+#define DEFAULT_OUTPUT_DIR "/storage/Music"
+#define DEFAULT_INCOMPLETE_DIR "/storage/Incomplete"
 #define DEFAULT_URL "http://svr1.msmn.co:8136"
 
 static BOOL m_prefs_updated = FALSE;
@@ -25,7 +25,12 @@ static void verify_splitpoint_rules (STREAM_PREFS *prefs);
 void init_config() {
     char *cfg_string = NULL;
     struct passwd *pw = getpwuid(getuid());
-    sprintf(cfg_file_name, "%s/%s", pw->pw_dir, DEFAULT_CFG_FILENAME);
+    ALOGV("username: %s\n", pw->pw_name);
+    if (pw->pw_uid == 0) { //am I root?
+        sprintf(cfg_file_name, "/etc/%s", DEFAULT_CFG_FILENAME);
+    } else {
+        sprintf(cfg_file_name, "%s/%s", pw->pw_dir, DEFAULT_CFG_FILENAME);
+    }
     m_config = cfg_open(cfg_file_name);
     cfg_string = cfg_get_single_value_as_string(m_config, "Default", "version");
     if (cfg_string == NULL || strcmp(cfg_string, VERSION))
