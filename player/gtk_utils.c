@@ -272,8 +272,8 @@ void gtk_poll(void)
                 gtk_label_set (GTK_LABEL (label2), "");
             }
             /*
-             *          * artist art
-             *                   */
+             * artist art
+             */
             image0 = GTK_WIDGET (gtk_builder_get_object (xml, "img_artist"));
             if (artist_art) {
                 printf("art: %s\n", artist_art);

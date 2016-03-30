@@ -3,15 +3,15 @@
   <requires lib="gtk+" version="2.24"/>
   <!-- interface-naming-policy project-wide -->
   <object class="GtkWindow" id="window1">
-    <property name="width_request">700</property>
-    <property name="height_request">400</property>
+    <property name="width_request">740</property>
+    <property name="height_request">580</property>
     <property name="can_focus">False</property>
     <property name="resizable">False</property>
     <property name="modal">True</property>
-    <property name="default_width">700</property>
-    <property name="default_height">400</property>
+    <property name="default_width">740</property>
+    <property name="default_height">580</property>
     <property name="decorated">False</property>
-    <property name="gravity">east</property>
+    <property name="gravity">right</property>
     <child>
       <object class="GtkVBox" id="vbox1">
         <property name="visible">True</property>

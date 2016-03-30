@@ -46,3 +46,4 @@ target_link_libraries(player ${CMAKE_THREAD_LIBS_INIT} ${GTK2_LIBRARIES}
     #    ${GTK2_GLADE_LIBRARY} ${LIBMPDCLIENT_LIBRARIES})
 
 install(TARGETS player DESTINATION bin)
+install(DIRECTORY "assets" DESTINATION "/usr/local/share/typlayer")
