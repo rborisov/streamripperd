@@ -17,10 +17,10 @@ endif ()
 ##-----------------------------------------------------------------------------
 include (CheckFunctionExists)
 include (CheckLibraryExists)
-include (FindPkgConfig)
+#include (FindPkgConfig)
 
 # http://www.cmake.org/pipermail/cmake/2008-December/025886.html
-include (InstallRequiredSystemLibraries)
+##include (InstallRequiredSystemLibraries)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -Wall -D__UNIX__ -fno-builtin -D_GNU_SOURCE")
 
@@ -29,11 +29,12 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -std=gnu99 -Wall -D__UNIX__ -fno-builtin -D_
 ##-----------------------------------------------------------------------------
 set (MATH_LIB -lm)
 
-pkg_check_modules (GLIB2 REQUIRED glib-2.0>=2.16)
+#pkg_check_modules (GLIB2 REQUIRED glib-2.0>=2.16)
 
 set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/cmake" ${CMAKE_MODULE_PATH})
+find_package (GLIB2 REQUIRED)
 find_package (IBERTY)
-find_package (MAD)
+find_package (MAD REQUIRED)
 find_package (OGG)
 find_package (Threads)
 find_package (VORBIS)
@@ -45,8 +46,8 @@ find_library (SEMAPHORE_LIBRARIES NAMES sem rt)
 ##-----------------------------------------------------------------------------
 ##  Include directories
 ##-----------------------------------------------------------------------------
-include_directories (BEFORE ${GLIB2_INCLUDE_DIRS})
-include_directories (BEFORE ${CMAKE_CURRENT_BINARY_DIR})
+include_directories (BEFORE ${GLIB2_INCLUDE_DIRS} ${MAD_INCLUDE_DIR})
+#include_directories (BEFORE ${CMAKE_CURRENT_BINARY_DIR})
 include_directories (BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/lib)
 include_directories (BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/include)
 include_directories (BEFORE ${CMAKE_CURRENT_SOURCE_DIR}/src)
@@ -118,26 +119,26 @@ set (STREAMRIPPER_LDFLAGS "")
 add_executable (test_streamripper ${STREAMRIPPER_SRC})
 target_link_libraries (test_streamripper 
     streamripper1 ${STREAMRIPPER_LIBS})
-if (NOT STREAMRIPPER_LDFLAGS STREQUAL "")
-    set_target_properties (test_streamripper 
-	PROPERTIES LINK_FLAGS ${STREAMRIPPER_LDFLAGS})
-endif ()
+#if (NOT STREAMRIPPER_LDFLAGS STREQUAL "")
+#    set_target_properties (test_streamripper 
+#	PROPERTIES LINK_FLAGS ${STREAMRIPPER_LDFLAGS})
+#endif ()
 
 add_executable (streamripperd ${SRD_SRC})
 target_link_libraries (streamripperd 
     streamripper1 ${STREAMRIPPER_LIBS})
-if (NOT STREAMRIPPER_LDFLAGS STREQUAL "")
-    set_target_properties (streamripperd
-        PROPERTIES LINK_FLAGS ${STREAMRIPPER_LDFLAGS})
-endif ()
+#if (NOT STREAMRIPPER_LDFLAGS STREQUAL "")
+#    set_target_properties (streamripperd
+#        PROPERTIES LINK_FLAGS ${STREAMRIPPER_LDFLAGS})
+#endif ()
 
 add_executable (testclient ${TESTCLIENT_SRC})
 target_link_libraries (testclient 
     streamripper1 ${STREAMRIPPER_LIBS})
-if (NOT STREAMRIPPER_LDFLAGS STREQUAL "")
-    set_target_properties (testclient 
-        PROPERTIES LINK_FLAGS ${STREAMRIPPER_LDFLAGS})
-endif ()
+#if (NOT STREAMRIPPER_LDFLAGS STREQUAL "")
+#    set_target_properties (testclient 
+#        PROPERTIES LINK_FLAGS ${STREAMRIPPER_LDFLAGS})
+#endif ()
 
 ##-----------------------------------------------------------------------------
 ##  Install
