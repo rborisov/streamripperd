@@ -143,4 +143,4 @@ target_link_libraries (testclient
 ##-----------------------------------------------------------------------------
 ##  Install
 ##-----------------------------------------------------------------------------
-#install (TARGETS streamripper DESTINATION bin)
+install (TARGETS streamripperd DESTINATION usr/bin)
