@@ -51,7 +51,7 @@ int main (int argc, char *argv[])
             case 'v':
                 printf ("%s %s\n%s\n", g_ascii_strdown(APPNAME,strlen(APPNAME)),
                         VERSION,
-                        "Copyright 2015 Roman Borisov");
+                        "Copyright 2016 Roman Borisov");
                 goto cleanup;
                 break;
             case 'h':

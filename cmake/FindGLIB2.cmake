@@ -20,33 +20,34 @@
 #  For details see the accompanying COPYING-CMAKE-SCRIPTS file.
 #
 
+MESSAGE(STATUS "${CMAKE_C_COMPILER_TARGET}")
 
 IF (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
     # in cache already
     SET(GLIB2_FOUND TRUE)
 ELSE (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
 
-    INCLUDE(FindPkgConfig)
+        INCLUDE(FindPkgConfig)
 
     ## Glib
-    IF ( GLIB2_FIND_REQUIRED )
-        SET( _pkgconfig_REQUIRED "REQUIRED" )
-    ELSE ( GLIB2_FIND_REQUIRED )
-        SET( _pkgconfig_REQUIRED "" )
-    ENDIF ( GLIB2_FIND_REQUIRED )
+        IF ( GLIB2_FIND_REQUIRED )
+            SET( _pkgconfig_REQUIRED "REQUIRED" )
+        ELSE ( GLIB2_FIND_REQUIRED )
+            SET( _pkgconfig_REQUIRED "" )
+        ENDIF ( GLIB2_FIND_REQUIRED )
 
-    IF ( GLIB2_MIN_VERSION )
-        PKG_SEARCH_MODULE( GLIB2 ${_pkgconfig_REQUIRED} glib-2.0>=${GLIB2_MIN_VERSION} )
-    ELSE ( GLIB2_MIN_VERSION )
-        PKG_SEARCH_MODULE( GLIB2 ${_pkgconfig_REQUIRED} glib-2.0 )
-    ENDIF ( GLIB2_MIN_VERSION )
-    IF ( PKG_CONFIG_FOUND )
-        IF ( GLIB2_FOUND )
-            SET ( GLIB2_CORE_FOUND TRUE )
-        ELSE ( GLIB2_FOUND )
-            SET ( GLIB2_CORE_FOUND FALSE )
-        ENDIF ( GLIB2_FOUND )
-    ENDIF ( PKG_CONFIG_FOUND )
+        IF ( GLIB2_MIN_VERSION )
+            PKG_SEARCH_MODULE( GLIB2 ${_pkgconfig_REQUIRED} glib-2.0>=${GLIB2_MIN_VERSION} )
+        ELSE ( GLIB2_MIN_VERSION )
+            PKG_SEARCH_MODULE( GLIB2 ${_pkgconfig_REQUIRED} glib-2.0 )
+        ENDIF ( GLIB2_MIN_VERSION )
+        IF ( PKG_CONFIG_FOUND )
+            IF ( GLIB2_FOUND )
+                SET ( GLIB2_CORE_FOUND TRUE )
+            ELSE ( GLIB2_FOUND )
+                SET ( GLIB2_CORE_FOUND FALSE )
+            ENDIF ( GLIB2_FOUND )
+        ENDIF ( PKG_CONFIG_FOUND )
 
     # Look for glib2 include dir and libraries w/o pkgconfig
     IF ( NOT GLIB2_FOUND AND NOT PKG_CONFIG_FOUND )
@@ -55,6 +56,9 @@ ELSE (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
             NAMES
             glibconfig.h
             PATHS
+            /usr/lib/${CMAKE_C_COMPILER_TARGET}
+            /usr/lib/x86_64-linux-gnu
+		/usr/lib/arm-linux-gnueabihf
             /opt/gnome/lib64
             /opt/gnome/lib
             /opt/lib/
@@ -107,9 +111,20 @@ ELSE (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
             SET ( GLIB2_CORE_FOUND TRUE )
         ELSE ( _glib2_FOUND )
             SET ( GLIB2_CORE_FOUND FALSE )
+            MESSAGE(STATUS "GLIB2_CORE NOT FOUND")
         ENDIF ( _glib2_FOUND )
 
         # Handle dependencies
+        FIND_LIBRARY(LIBPCRE_LIBRARY
+            NAMES
+            pcre
+            PATHS
+            /lib/${CMAKE_C_COMPILER_TARGET}
+            )
+        MESSAGE(STATUS "LIBPCRE_LIBRARY: ${LIBPCRE_LIBRARY}")
+        SET (GLIB2_LIBRARIES ${GLIB2_LIBRARIES} ${LIBPCRE_LIBRARY})
+
+
         # libintl
         IF ( NOT LIBINTL_FOUND )
             FIND_PATH(LIBINTL_INCLUDE_DIR
@@ -184,6 +199,8 @@ ELSE (GLIB2_LIBRARIES AND GLIB2_INCLUDE_DIRS )
 
     ENDIF ( NOT GLIB2_FOUND AND NOT PKG_CONFIG_FOUND )
     ##
+
+    MESSAGE(STATUS "core: ${GLIB2_CORE_FOUND}; include: ${GLIB2_INCLUDE_DIRS}; libs: ${GLIB2_LIBRARIES}")
 
     IF (GLIB2_CORE_FOUND AND GLIB2_INCLUDE_DIRS AND GLIB2_LIBRARIES)
         SET (GLIB2_FOUND TRUE)
